@@ -137,7 +137,7 @@ async function main() {
   console.log('group member list:')
   console.table(groupMemberList)
 
-  console.log(`\ntxn table for contract ${address}:`)
+  console.log(`\neventLogs for contract ${address}:`)
   console.table(table)
 }
 
