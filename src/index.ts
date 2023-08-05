@@ -8,24 +8,24 @@ const client = createPublicClient({
   transport: http('https://gateway.tenderly.co/public/sepolia'),
 })
 
-type ContractAddress = `0x${string}`
+type AddressLike = `0x${string}`
 
-async function isContract(contractaddress: ContractAddress, block: number) {
+async function isContract(address: AddressLike, block: number) {
   return (
     (await client.getBytecode({
-      address: contractaddress,
+      address: address,
       blockNumber: BigInt(block),
     })) !== undefined
   )
 }
 
-async function getCreationBlock(contractAddress: ContractAddress) {
+async function getCreationBlock(address: AddressLike) {
   let start = 0
   let end = Number(await client.getBlockNumber())
   while (start <= end) {
     const mid = Math.ceil((start + end) / 2)
-    const createdPrevBlock = await isContract(contractAddress, mid - 1)
-    const createdThisBlock = await isContract(contractAddress, mid)
+    const createdPrevBlock = await isContract(address, mid - 1)
+    const createdThisBlock = await isContract(address, mid)
 
     if (!createdPrevBlock && createdThisBlock) {
       return mid
@@ -46,7 +46,7 @@ async function getCreationBlock(contractAddress: ContractAddress) {
 }
 
 async function getContractLog(
-  contractAddress: ContractAddress,
+  contractAddress: AddressLike,
   startBlock: number,
   endBlock: number,
 ) {
@@ -56,15 +56,24 @@ async function getContractLog(
     toBlock: BigInt(endBlock),
   })
 }
+interface Config {
+  name: string
+  discord: string
+}
 
-let contractAlias = new CaseInsensitiveMap<ContractAddress, string>([
-  ['0xb66c6d8d96faa683a4eb2cb4b854f7bb2295e01e', 'Alice'],
-  ['0x1E2cD78882b12d3954a049Fd82FFD691565dC0A5', 'RandomGuy1'],
-  ['0xb66c6D8d96fAa683A4eb2Cb4b854f7bB2295e01E', 'RandomGuy2'],
+let addressConfig = new CaseInsensitiveMap<AddressLike, Config>([
+  [
+    '0xb66c6d8d96faa683a4eb2cb4b854f7bb2295e01e',
+    { name: 'Alice', discord: 'haha123' },
+  ],
+  [
+    '0x1E2cD78882b12d3954a049Fd82FFD691565dC0A5',
+    { name: 'RandomGuy', discord: '' },
+  ],
 ])
 
 async function main() {
-  const address: ContractAddress = '0xbC37826f1e592e391AB8eA8c676540b3c63eEE0d'
+  const address: AddressLike = '0xbC37826f1e592e391AB8eA8c676540b3c63eEE0d'
   const creationBlock = await getCreationBlock(address)
 
   if (creationBlock === -1) {
@@ -82,11 +91,11 @@ async function main() {
   }
 
   const logsArr = await Promise.all(promises)
-
   const sortedLogs = logsArr
     .filter((logs) => logs.length > 0)
     .flat()
     .sort((a, b) => (Number(a.blockNumber) > Number(b.blockNumber) ? 1 : -1))
+    .sort((a, b) => (Number(a.logIndx) > Number(b.logIndx) ? 1 : -1))
 
   const table = []
   for (const i of sortedLogs) {
@@ -95,20 +104,40 @@ async function main() {
       data: i['data'],
       topics: i['topics'],
     })
-    const sender = await (
-      await client.getTransaction({ hash: i['transactionHash'] })
-    ).from
+    const sender = (await client.getTransaction({ hash: i['transactionHash'] }))
+      .from
 
-    const alias = contractAlias.get(sender) ?? sender
+    const alias = addressConfig.get(sender)?.name ?? sender
 
     table.push({
       sender: alias,
       event: decodedLog['eventName'],
-      args: decodedLog['args'],
+      args: Object.entries(decodedLog['args']).map(
+        ([key, value]) =>
+          `${key}: ${addressConfig.get(value as AddressLike)?.name ?? value}`,
+      ),
       txnHash: i['transactionHash'],
     })
   }
 
+  const groupMemberList: {
+    address: AddressLike
+    name: string
+    discordId: string
+  }[] = []
+
+  addressConfig.forEach((i, key) => {
+    groupMemberList.push({
+      address: key,
+      name: i.name,
+      discordId: i.discord,
+    })
+  })
+
+  console.log('group member list:')
+  console.table(groupMemberList)
+
+  console.log(`\ntxn table for contract ${address}:`)
   console.table(table)
 }
 
