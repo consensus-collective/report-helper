@@ -1,0 +1,19 @@
+{
+  "contractAddress": "0x3975D8F35b9B805A3B05605F54ea6a615f2D4599",
+  "abi": "./abis/Ballot2.json",
+  "chunkSize": 500,
+  "userConfig": [
+    {
+      "0xb66c6d8d96faa683a4eb2cb4b854f7bb2295e01e": {
+        "name": "Alice",
+        "discord": "haha123"
+      }
+    },
+    {
+      "0xb66c6d8d96faa683a4eb2cb4b854f7bb2295e01f": {
+        "name": "Alice2",
+        "discord": "haha123"
+      }
+    }
+  ]
+}

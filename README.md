@@ -1,21 +1,24 @@
 # report-helper
 
+### configs
+
+- contractAddress: contract address
+- abi: file path of the contract ABI
+- chunkSize: number of block to search in each `getLogs()`
+- userConfig:
+
+### command
+
+- `[--verbose, -v]`
+- `[--o, -o] PATH`
+
+### run
+
 ```bash
+$ yarn
 $ yarn report
-
-group member list:
-┌─────────┬──────────────────────────────────────────────┬─────────────┬───────────┐
-│ (index) │                   address                    │    name     │ discordId │
-├─────────┼──────────────────────────────────────────────┼─────────────┼───────────┤
-│    0    │ '0xb66c6d8d96faa683a4eb2cb4b854f7bb2295e01e' │   'Alice'   │ 'haha123' │
-│    1    │ '0x1e2cd78882b12d3954a049fd82ffd691565dc0a5' │ 'RandomGuy' │    ''     │
-└─────────┴──────────────────────────────────────────────┴─────────────┴───────────┘
-
-eventLogs table for contract 0xbC37826f1e592e391AB8eA8c676540b3c63eEE0d:
-┌─────────┬─────────┬─────────────────┬─────────────────────────────────────┬──────────────────────────────────────────────────────────────────────┐
-│ (index) │ sender  │      event      │                args                 │                               txnHash                                │
-├─────────┼─────────┼─────────────────┼─────────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤
-│    0    │ 'Alice' │ 'GiveVoteRight' │       [ 'voter: RandomGuy' ]        │ '0xfe373d0543c87a148a0ec8bf925f7716704dea4dad840c27488980d1b49182ec' │
-│    1    │ 'Alice' │     'Vote'      │ [ 'voter: Alice', 'proposalId: 3' ] │ '0x3599c5de83bad589a0f7445c954f94c90967881ccd68767909cdbb328b5482d5' │
-└─────────┴─────────┴─────────────────┴─────────────────────────────────────┴──────────────────────────────────────────────────────────────────────┘
 ```
+
+### demo
+
+- [demo](DEMO.md)
